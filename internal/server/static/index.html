@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyWatcher</title>
+    <link rel="icon" type="image/png" href="/logo">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background: #f5f5f5; color: #333; }
+        .nav { background: #1e293b; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .nav button { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 4px 12px; border-radius: 4px; cursor: pointer; }
+        .nav button:hover { color: white; border-color: #475569; }
+        .tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; padding: 0 24px; background: white; }
+        .tab { padding: 12px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab:hover { background: #f8fafc; }
+        .tab.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 500; }
+        .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .card { background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0; }
+        .card .number { font-size: 32px; font-weight: 700; }
+        .card .label { color: #64748b; font-size: 14px; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin-top: 16px; }
+        th { background: #f8fafc; padding: 12px 16px; text-align: left; font-size: 13px; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        tr:last-child td { border-bottom: none; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        input, select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-bottom: 12px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #374151; }
+        .login-box { max-width: 360px; margin: 100px auto; background: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .login-box h1 { font-size: 24px; margin-bottom: 24px; text-align: center; }
+        .error { color: #ef4444; font-size: 13px; margin-top: 8px; }
+        .success { color: #22c55e; font-size: 13px; margin-top: 8px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        .badge-orange { background: #ffedd5; color: #c2410c; }
+        .badge-yellow { background: #fef9c3; color: #ca8a04; }
+        .badge-green { background: #dcfce7; color: #16a34a; }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-purple { background: #f3e8ff; color: #7c3aed; }
+        .badge-gray { background: #f1f5f9; color: #475569; }
+        .hidden { display: none; }
+        .filter-box { margin-bottom: 16px; }
+        .filter-box input { margin-bottom: 0; }
+        .edit-form { background: #f8fafc; padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid #e2e8f0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row.full { grid-template-columns: 1fr; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; user-select: none; }
+        .section-header:hover { background: #f1f5f9; }
+        .section-header h3 { margin: 0; font-size: 15px; font-weight: 600; color: #1e293b; }
+        .section-toggle { display: inline-block; width: 20px; height: 20px; color: #64748b; font-size: 14px; font-weight: 600; transition: transform 0.2s ease; }
+        .section-toggle.open { transform: rotate(180deg); }
+        .section-content { max-height: 2000px; overflow: hidden; transition: max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease; margin: 16px 0; padding: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .section-content.collapsed { max-height: 0; margin: 0; padding: 0; border: none; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="hidden">
+        <div class="login-box">
+            <div style="text-align:center;margin-bottom:24px">
+                <img class="app-logo-img" src="" style="display:none;height:56px;width:auto;object-fit:contain">
+                <div class="app-logo-text">
+                    <div style="font-size:22px;font-weight:700;color:#1e293b">KeyWatcher</div>
+                </div>
+                <div style="font-size:13px;color:#64748b;margin-top:6px">Create your admin account to get started</div>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="setup-username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="setup-email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="setup-password" placeholder="At least 8 characters">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="setup-confirm" placeholder="Confirm password">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 0;" onclick="submitSetup()">Create Admin Account</button>
+            <div id="setup-error" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div style="text-align:center;margin-bottom:24px">
+                <img class="app-logo-img" src="" style="display:none;height:56px;width:auto;object-fit:contain">
+                <div class="app-logo-text">
+                    <div style="font-size:22px;font-weight:700;color:#1e293b">KeyWatcher</div>
+                </div>
+                <div style="font-size:13px;color:#64748b;margin-top:6px">Sign in to your account</div>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="Enter password">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 0;" onclick="submitLogin()">Login</button>
+            <div style="text-align:center;margin-top:12px;color:#94a3b8;font-size:13px">or</div>
+            <button id="oidc-login-btn" class="btn" onclick=""
+                style="display:none;width:100%;background:#f1f5f9;margin-top:8px;padding:10px">
+                🔐 Sign in with SSO (OIDC)
+            </button>
+            <div id="login-error" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-screen" class="hidden">
+        <!-- Navigation Bar -->
+        <div class="nav">
+            <div style="display:flex;align-items:center;gap:10px">
+                <img class="app-logo-img" src="" style="display:none;height:28px;width:auto;filter:brightness(0) invert(1);object-fit:contain">
+                <span class="app-logo-text" style="font-size:18px;font-weight:700">KeyWatcher</span>
+            </div>
+            <div>
+                <span id="username-display"></span>
+                <button onclick="logout()" style="margin-left: 12px;">Logout</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard" onclick="showTab(this.dataset.tab)">📊 Dashboard</div>
+            <div class="tab" data-tab="assets" onclick="showTab(this.dataset.tab)">📋 Assets</div>
+            <div class="tab" data-tab="add-asset" onclick="showTab(this.dataset.tab)">➕ Add Asset</div>
+            <div class="tab" data-tab="users" onclick="showTab(this.dataset.tab)">👥 Users</div>
+            <div class="tab" data-tab="settings" onclick="showTab(this.dataset.tab)">⚙ Settings</div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-content" style="display:none">
+                <div class="cards">
+                    <div class="card"><div class="number" id="stat-total">0</div><div class="label">Total Assets</div></div>
+                    <div class="card"><div class="number" id="stat-expiring">0</div><div class="label">Expiring (≤30d)</div></div>
+                    <div class="card"><div class="number" id="stat-critical">0</div><div class="label">Critical (≤7d)</div></div>
+                    <div class="card"><div class="number" id="stat-expired">0</div><div class="label">Expired</div></div>
+                </div>
+                <h3>Soonest Expiring (Top 10)</h3>
+                <table id="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Expires</th>
+                            <th>Days Left</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Assets Tab -->
+            <div id="tab-assets" class="tab-content" style="display:none">
+                <div class="filter-box">
+                    <input type="text" id="asset-filter" placeholder="🔍 Filter by name...">
+                </div>
+                <div id="assets-error" class="error"></div>
+                <table id="assets-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Expires</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assets-table-body"></tbody>
+                </table>
+                <div id="edit-form" class="edit-form hidden">
+                    <h4>Edit Asset</h4>
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="edit-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="edit-type">
+                            <option value="certificate">Certificate</option>
+                            <option value="token">Token</option>
+                            <option value="api_key">API Key</option>
+                            <option value="secret">Secret</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Expires At</label>
+                        <input type="date" id="edit-expires">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit-description" rows="2"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveAsset()">Save</button>
+                    <button class="btn" onclick="cancelEdit()" style="background: #e2e8f0; color: #333; margin-left: 8px;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Add Asset Tab -->
+            <div id="tab-add-asset" class="tab-content" style="display:none">
+                <div style="max-width: 600px;">
+                    <form id="add-asset-form">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="asset-name" placeholder="e.g., prod-cert-2024">
+                        </div>
+                        <div class="form-group">
+                            <label>Type *</label>
+                            <select id="asset-type" onchange="onAssetTypeChange()">
+                                <option value="">Select type...</option>
+                                <option value="certificate">Certificate</option>
+                                <option value="token">Token</option>
+                                <option value="api_key">API Key</option>
+                                <option value="secret">Secret</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Expires At *</label>
+                            <input type="date" id="asset-expires">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="asset-desc" rows="3" placeholder="Optional notes"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Tags (key=value,key=value)</label>
+                            <input type="text" id="asset-tags" placeholder="env=prod,team=infra">
+                        </div>
+                        <div id="pem-group" style="display:none;border:1px solid #e2e8f0;border-radius:8px;
+                             padding:16px;background:#f8fafc;margin-bottom:12px">
+                            <div class="form-group">
+                                <label>Upload Certificate File (.pem, .crt, .cer)</label>
+                                <input id="asset-pem-file" type="file" accept=".pem,.crt,.cer,.cert"
+                                       style="width:100%;padding:8px;border:2px dashed #cbd5e1;
+                                              border-radius:6px;background:white;cursor:pointer">
+                            </div>
+                            <div class="form-group">
+                                <label>Or paste PEM text</label>
+                                <textarea id="asset-pem" rows="5"
+                                    placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"></textarea>
+                            </div>
+                            <div id="pem-hint" style="font-size:13px;margin-top:-8px"></div>
+                        </div>
+                        <p style="font-size:12px;color:#64748b;margin-top:8px;display:flex;align-items:center;gap:4px">
+                            🔒 Certificate content is processed locally in your browser only. The PEM data is never sent to the server — only the expiry date is saved.
+                        </p>
+                        <button type="button" class="btn btn-primary" onclick="submitAsset()">Add Asset</button>
+                    </form>
+                    <div id="asset-form-error" class="error"></div>
+                    <div id="asset-form-success" class="success"></div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="tab-users" class="tab-content" style="display:none">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                    <h2 style="font-size:18px;font-weight:600">Users</h2>
+                    <button class="btn btn-primary" onclick="toggleCreateUser()">+ Add User</button>
+                </div>
+
+                <!-- Create user form (hidden by default) -->
+                <div id="create-user-form" style="display:none;background:white;border:1px solid #e2e8f0;
+                     border-radius:8px;padding:24px;margin-bottom:20px;max-width:480px">
+                    <h3 style="margin-bottom:16px;font-size:15px;font-weight:600">Create Local User</h3>
+                    <div class="form-group"><label>Username</label>
+                        <input id="new-username" placeholder="john"></div>
+                    <div class="form-group"><label>Email</label>
+                        <input id="new-email" type="email" placeholder="john@example.com"></div>
+                    <div class="form-group"><label>Password</label>
+                        <input id="new-password" type="password" placeholder="min 8 characters"></div>
+                    <div id="create-user-error" class="error"></div>
+                    <div id="create-user-success" class="success"></div>
+                    <div style="display:flex;gap:8px;margin-top:4px">
+                        <button class="btn btn-primary" onclick="submitCreateUser()">Create</button>
+                        <button class="btn" onclick="toggleCreateUser()"
+                            style="background:#f1f5f9">Cancel</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th><th>Email</th>
+                            <th>Auth Method</th><th>Role</th><th>Last Login</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:32px">
+                            Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content" style="display:none">
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:24px">Settings</h2>
+
+                <!-- Authentication Section -->
+                <div class="section-header" onclick="toggleSection('auth-section')">
+                    <h3>🔐 Authentication</h3>
+                    <span class="section-toggle" id="auth-toggle">▼</span>
+                </div>
+                <div id="auth-section" class="section-content collapsed">
+                    <p style="color:#64748b;font-size:13px;margin-bottom:20px">
+                        Local auth is always enabled. Enable additional providers below.
+                    </p>
+
+                    <!-- OIDC -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                            <div>
+                                <div style="font-weight:600">OIDC / SSO</div>
+                                <div style="font-size:13px;color:#64748b">Keycloak, Okta, Google Workspace, etc.</div>
+                            </div>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" id="oidc-enabled" onchange="toggleOIDCFields()"
+                                       style="width:16px;height:16px">
+                                <span style="font-size:13px">Enable</span>
+                            </label>
+                        </div>
+                        <div id="oidc-fields" style="display:none">
+                            <div class="form-group"><label>Issuer URL</label>
+                                <input id="oidc-issuer" placeholder="https://accounts.example.com"></div>
+                            <div class="form-group"><label>Client ID</label>
+                                <input id="oidc-client-id" placeholder="keywatcher"></div>
+                            <div class="form-group"><label>Client Secret</label>
+                                <input id="oidc-client-secret" type="password" placeholder="leave blank to keep existing"></div>
+                        </div>
+                    </div>
+
+                    <!-- LDAP -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                            <div>
+                                <div style="font-weight:600">LDAP / Active Directory</div>
+                                <div style="font-size:13px;color:#64748b">OpenLDAP, Microsoft AD, FreeIPA, etc.</div>
+                            </div>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" id="ldap-enabled" onchange="toggleLDAPFields()"
+                                       style="width:16px;height:16px">
+                                <span style="font-size:13px">Enable</span>
+                            </label>
+                        </div>
+                        <div id="ldap-fields" style="display:none">
+                            <div class="form-group"><label>LDAP URL</label>
+                                <input id="ldap-url" placeholder="ldap://ldap.example.com:389"></div>
+                            <div class="form-group"><label>Bind DN</label>
+                                <input id="ldap-bind-dn" placeholder="cn=keywatcher,dc=example,dc=com"></div>
+                            <div class="form-group"><label>Bind Password</label>
+                                <input id="ldap-bind-password" type="password" placeholder="leave blank to keep existing"></div>
+                            <div class="form-group"><label>Base DN</label>
+                                <input id="ldap-base-dn" placeholder="ou=users,dc=example,dc=com"></div>
+                            <div class="form-group"><label>User Filter</label>
+                                <input id="ldap-user-filter" placeholder="(uid=%s)"></div>
+                        </div>
+                    </div>
+
+                    <div id="settings-error" class="error" style="margin-top:12px"></div>
+                    <div id="settings-success" class="success" style="margin-top:12px"></div>
+                    <button class="btn btn-primary" style="margin-top:16px" onclick="saveSettings()">
+                        Save Settings
+                    </button>
+                    <p style="font-size:12px;color:#94a3b8;margin-top:8px">
+                        ⚠ Changes take effect on next login. Active sessions are not affected.
+                    </p>
+                </div>
+
+                <!-- Alert Rules Section -->
+                <div class="section-header" onclick="toggleSection('alerts-rules-section')">
+                    <h3>⚙️ Alert Rules</h3>
+                    <span class="section-toggle" id="alerts-rules-toggle">▼</span>
+                </div>
+                <div id="alerts-rules-section" class="section-content collapsed">
+                    <p style="color:#64748b;font-size:13px;margin-bottom:20px">
+                        Configure when alerts fire and how often to check.
+                    </p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                        <div class="form-group">
+                            <label>⚠ Warning threshold (days)</label>
+                            <input id="alert-warning-days" type="number" min="1" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label>🚨 Critical threshold (days)</label>
+                            <input id="alert-critical-days" type="number" min="1" placeholder="7">
+                        </div>
+                        <div class="form-group">
+                            <label>Check interval</label>
+                            <select id="alert-interval">
+                                <option value="15m">Every 15 minutes</option>
+                                <option value="30m">Every 30 minutes</option>
+                                <option value="1h">Every hour</option>
+                                <option value="6h">Every 6 hours</option>
+                                <option value="24h">Every 24 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Templates Section -->
+                <div class="section-header" onclick="toggleSection('alerts-templates-section')">
+                    <h3>✉️ Alert Templates</h3>
+                    <span class="section-toggle" id="alerts-templates-toggle">▼</span>
+                </div>
+                <div id="alerts-templates-section" class="section-content collapsed">
+                    <p style="color:#64748b;font-size:13px;margin-bottom:8px">
+                        Customize the message format for each severity level.
+                    </p>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;
+                                padding:12px;margin-bottom:16px;font-size:12px;
+                                color:#475569;line-height:2">
+                        <strong>Available variables:</strong><br>
+                        <code>{asset_name}</code> &nbsp;
+                        <code>{asset_type}</code> &nbsp;
+                        <code>{days_left}</code> &nbsp;
+                        <code>{expires_at}</code> &nbsp;
+                        <code>{env}</code> &nbsp;
+                        <code>{severity}</code> &nbsp;
+                        <code>{emoji}</code>
+                    </div>
+                    <div class="form-group">
+                        <label style="color:#ca8a04">⚠️ Warning template</label>
+                        <textarea id="alert-template-warning" rows="3"
+                            style="font-family:monospace;font-size:13px"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="color:#ea580c">🚨 Critical template</label>
+                        <textarea id="alert-template-critical" rows="3"
+                            style="font-family:monospace;font-size:13px"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="color:#dc2626">☠️ Expired template</label>
+                        <textarea id="alert-template-expired" rows="3"
+                            style="font-family:monospace;font-size:13px"></textarea>
+                    </div>
+                    <button class="btn btn-sm" style="background:#f1f5f9"
+                        onclick="resetTemplates()">↩ Reset to defaults</button>
+                </div>
+
+                <!-- Notification Channels Section -->
+                <div class="section-header" onclick="toggleSection('notification-channels-section')">
+                    <h3>📨 Notification Channels</h3>
+                    <span class="section-toggle" id="notification-channels-toggle">▼</span>
+                </div>
+                <div id="notification-channels-section" class="section-content collapsed">
+                    <p style="color:#64748b;font-size:13px;margin-bottom:20px">
+                        Configure one or more channels. All enabled channels receive alerts.
+                    </p>
+
+                    <!-- Slack -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px">
+                        <div style="font-weight:600;margin-bottom:12px">Slack</div>
+                        <div class="form-group"><label>Incoming Webhook URL</label>
+                            <input id="alert-slack-webhook" placeholder="https://hooks.slack.com/services/..."></div>
+                        <div class="form-group"><label>Bot Token (optional, for bot messages)</label>
+                            <input id="alert-slack-token" type="password" placeholder="xoxb-..."></div>
+                        <div class="form-group"><label>Channel (optional)</label>
+                            <input id="alert-slack-channel" placeholder="#alerts"></div>
+                        <button class="btn btn-sm" style="background:#f1f5f9"
+                            onclick="testAlert('slack')">Send Test</button>
+                        <span id="test-slack-result" style="font-size:13px;margin-left:8px"></span>
+                    </div>
+
+                    <!-- Mattermost -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px">
+                        <div style="font-weight:600;margin-bottom:12px">Mattermost</div>
+                        <div class="form-group"><label>Incoming Webhook URL</label>
+                            <input id="alert-mattermost-webhook" placeholder="https://mattermost.example.com/hooks/..."></div>
+                        <div class="form-group"><label>Bot Token (optional)</label>
+                            <input id="alert-mattermost-token" type="password" placeholder="token..."></div>
+                        <div class="form-group"><label>Channel (optional)</label>
+                            <input id="alert-mattermost-channel" placeholder="alerts"></div>
+                        <button class="btn btn-sm" style="background:#f1f5f9"
+                            onclick="testAlert('mattermost')">Send Test</button>
+                        <span id="test-mattermost-result" style="font-size:13px;margin-left:8px"></span>
+                    </div>
+
+                    <!-- Telegram -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:12px">
+                        <div style="font-weight:600;margin-bottom:12px">Telegram</div>
+                        <p style="font-size:12px;color:#64748b;margin-bottom:12px">
+                            Create a bot via @BotFather, add it to your channel, then paste the token and chat ID below.
+                        </p>
+                        <div class="form-group"><label>Bot Token</label>
+                            <input id="alert-telegram-token" type="password" placeholder="123456:ABC-DEF..."></div>
+                        <div class="form-group"><label>Chat ID</label>
+                            <input id="alert-telegram-chat-id" placeholder="-1001234567890"></div>
+                        <button class="btn btn-sm" style="background:#f1f5f9"
+                            onclick="testAlert('telegram')">Send Test</button>
+                        <span id="test-telegram-result" style="font-size:13px;margin-left:8px"></span>
+                    </div>
+
+                    <!-- Generic Webhook -->
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px">
+                        <div style="font-weight:600;margin-bottom:12px">Generic Webhook</div>
+                        <p style="font-size:12px;color:#64748b;margin-bottom:12px">
+                            POSTs a JSON payload to any URL. Compatible with PagerDuty, OpsGenie, custom endpoints.
+                        </p>
+                        <div class="form-group"><label>Webhook URL</label>
+                            <input id="alert-webhook-url" placeholder="https://my.service.com/alert"></div>
+                        <button class="btn btn-sm" style="background:#f1f5f9"
+                            onclick="testAlert('webhook')">Send Test</button>
+                        <span id="test-webhook-result" style="font-size:13px;margin-left:8px"></span>
+                    </div>
+
+                    <div id="alert-settings-error" class="error" style="margin-top:12px"></div>
+                    <div id="alert-settings-success" class="success" style="margin-top:12px"></div>
+                    <button class="btn btn-primary" style="margin-top:16px" onclick="saveAlertSettings()">Save Alert Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Production logger — silent unless ?debug=1 in URL
+        var __debug = window.location.search.indexOf('debug=1') !== -1
+        var log = {
+            info:  function() { if (__debug) log.info.apply(console, arguments) },
+            error: function() { if (__debug) log.error.apply(console, arguments) },
+            warn:  function() { if (__debug) log.warn.apply(console, arguments) }
+        }
+
+        const API = '/api/v1'
+        let token = localStorage.getItem('vw_token') || ''
+        let allAssets = []
+
+        // Sanitize error messages — never expose internal details
+        function userError(msg) {
+            if (!msg) return 'An error occurred. Please try again.'
+            msg = String(msg).toLowerCase()
+            if (msg.indexOf('sql') !== -1 || msg.indexOf('pq:') !== -1 ||
+                msg.indexOf('postgres') !== -1 || msg.indexOf('panic') !== -1 ||
+                msg.indexOf('stack') !== -1 || msg.indexOf('error at line') !== -1) {
+                return 'A server error occurred. Please contact your administrator.'
+            }
+            return msg
+        }
+
+        // Generic fetch wrapper
+        async function api(method, path, body) {
+            const res = await fetch(API + path, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: body ? JSON.stringify(body) : undefined
+            })
+            if (res.status === 401) { logout(); return }
+            return res.json()
+        }
+
+        // Auth
+        async function submitLogin() {
+            const username = document.getElementById('login-username').value.trim()
+            const password = document.getElementById('login-password').value
+            const errEl = document.getElementById('login-error')
+            errEl.textContent = ''
+
+            if (!username || !password) {
+                errEl.textContent = 'Username and password are required'
+                return
+            }
+
+            try {
+                const r = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+                const data = await r.json()
+                if (!r.ok || data.error) {
+                    errEl.textContent = userError(data.error) || 'Login failed'
+                    return
+                }
+                token = data.data.token
+                localStorage.setItem('vw_token', token)
+                showApp()
+                loadDashboard()
+            } catch (e) {
+                errEl.textContent = 'Network error — is the server running?'
+            }
+        }
+
+        function logout() {
+            fetch('/api/v1/auth/logout', { method:'POST', headers:{ Authorization:`Bearer ${token}` } }).catch(()=>{})
+            token = ''
+            localStorage.removeItem('vw_token')
+            window.currentUserRole = 'viewer'
+            document.getElementById('app-screen').style.display    = 'none'
+            document.getElementById('login-screen').style.display  = 'block'
+            // Clear any open overlays
+            document.querySelectorAll('[id$="-overlay"]').forEach(el => el.remove())
+            // Reset login form
+            const lu = document.getElementById('login-username')
+            const lp = document.getElementById('login-password')
+            const le = document.getElementById('login-error')
+            if (lu) lu.value = ''
+            if (lp) lp.value = ''
+            if (le) le.textContent = ''
+        }
+
+        // Navigation
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden')
+            document.getElementById('app-screen').classList.add('hidden')
+        }
+
+        function getRoleFromToken(jwt) {
+            try {
+                const payload = JSON.parse(atob(jwt.split('.')[1]))
+                return payload.role || 'viewer'
+            } catch(e) { return 'viewer' }
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display  = 'none'
+            document.getElementById('setup-screen').style.display  = 'none'
+            document.getElementById('app-screen').style.display = 'block'
+
+            // Decode role from JWT
+            window.currentUserRole = getRoleFromToken(token)
+            const isAdmin = window.currentUserRole === 'admin'
+
+            // Show/hide tabs based on role
+            const adminOnlyTabs = ['assets', 'add-asset', 'users', 'settings']
+            adminOnlyTabs.forEach(tabName => {
+                const el = document.querySelector(`.tab[data-tab="${tabName}"]`)
+                if (el) el.style.display = isAdmin ? '' : 'none'
+            })
+
+            // Show username
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]))
+                document.getElementById('username-display').textContent = payload.email || 'User'
+            } catch (e) {}
+
+            // Always start on dashboard
+            showTab('dashboard')
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DATA LOADING SYSTEM - apiFetch, loadAssets, loadDashboard, etc
+        // ═══════════════════════════════════════════════════════════════
+
+        async function apiFetch(path) {
+            const resp = await fetch(path, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            if (!resp.ok) {
+                log.error('apiFetch failed:', path, resp.status)
+                return null
+            }
+            const json = await resp.json()
+            log.info('apiFetch', path, '->', JSON.stringify(json).substring(0, 300))
+            return json
+        }
+
+        async function loadAssets() {
+            const json = await apiFetch('/api/v1/assets?limit=200')
+            if (!json) { renderAssetsTable([]); return [] }
+
+            // Extract array from whatever shape arrives
+            var assets = (
+                Array.isArray(json)              ? json :
+                Array.isArray(json.data)         ? json.data :
+                Array.isArray(json.data && json.data.assets) ? json.data.assets :
+                json.data && Array.isArray(json.data.assets) ? json.data.assets :
+                []
+            )
+            log.info('loadAssets resolved', assets.length, 'assets')
+            renderAssetsTable(assets)
+            return assets
+        }
+
+        async function loadDashboard() {
+            const assets = await loadAssets()
+
+            var total = assets.length
+            var expiring = 0, critical = 0, expired = 0
+            for (var i = 0; i < assets.length; i++) {
+                var d = daysUntil(assets[i].expires_at)
+                if (d < 0) expired++
+                else if (d <= 7) critical++
+                else if (d <= 30) expiring++
+            }
+
+            function setNum(id, n) {
+                var el = document.getElementById(id)
+                if (el) el.textContent = n
+                else log.warn('element not found:', id)
+            }
+            setNum('stat-total',    total)
+            setNum('stat-expiring', expiring)
+            setNum('stat-critical', critical)
+            setNum('stat-expired',  expired)
+
+            var sorted = assets.slice().sort(function(a,b){
+                return new Date(a.expires_at) - new Date(b.expires_at)
+            }).slice(0, 10)
+
+            var tbody = document.getElementById('dashboard-table-body')
+            if (!tbody) { log.error('NO dashboard-table-body IN DOM'); return }
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:32px">No assets yet.</td></tr>'
+                return
+            }
+            var rows = ''
+            for (var j = 0; j < sorted.length; j++) {
+                var a = sorted[j]
+                var d = daysUntil(a.expires_at)
+                rows += '<tr>'
+                    + '<td>' + (a.name || '') + '</td>'
+                    + '<td>' + (a.type || '') + '</td>'
+                    + '<td>' + formatDate(a.expires_at) + '</td>'
+                    + '<td style="color:' + dayColor(d) + ';font-weight:600">' + daysLabel(d) + '</td>'
+                    + '</tr>'
+            }
+            tbody.innerHTML = rows
+        }
+
+        function renderAssetsTable(assets) {
+            var tbody = document.getElementById('assets-table-body')
+            if (!tbody) { log.error('NO assets-table-body IN DOM'); return }
+
+            if (!assets || assets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">No assets found.</td></tr>'
+                return
+            }
+
+            var rows = ''
+            for (var i = 0; i < assets.length; i++) {
+                var a = assets[i]
+                var d = daysUntil(a.expires_at)
+                var bg = d < 0 ? '#fef2f2' : d <= 7 ? '#fff7ed' : d <= 30 ? '#fefce8' : 'white'
+
+                var actions = ''
+                if (window.currentUserRole === 'admin') {
+                    actions += '<button class="btn btn-sm" onclick="editAsset(\'' + a.id + '\')">Edit</button> '
+                    actions += '<button class="btn btn-sm btn-danger" onclick="deleteAsset(\'' + a.id + '\',\'' + (a.name||'').replace(/'/g,"\\'") + '\')">Delete</button> '
+                    if (a.is_silenced) {
+                        actions += '<button class="btn btn-sm" style="background:#fef9c3;color:#854d0e" onclick="unsilenceAsset(\'' + a.id + '\')">🔔 Unsilence</button>'
+                    } else {
+                        actions += '<button class="btn btn-sm" style="background:#f1f5f9" onclick="silenceAsset(\'' + a.id + '\',\'' + (a.name||'').replace(/'/g,"\\'") + '\')">🔕 Silence</button>'
+                    }
+                } else {
+                    actions = '<span style="color:#94a3b8;font-size:12px">read only</span>'
+                }
+
+                rows += '<tr style="background:' + bg + '">'
+                    + '<td>' + (a.name||'') + '</td>'
+                    + '<td>' + (a.type||'') + '</td>'
+                    + '<td>' + formatDate(a.expires_at) + '</td>'
+                    + '<td style="color:' + dayColor(d) + ';font-weight:600">' + daysLabel(d) + '</td>'
+                    + '<td><span class="badge ' + statusBadgeClass(d) + '">' + statusLabel(d) + '</span></td>'
+                    + '<td>' + (a.is_silenced ? '🔕' : '') + '</td>'
+                    + '<td>' + actions + '</td>'
+                    + '</tr>'
+            }
+            tbody.innerHTML = rows
+        }
+
+        function filterAssets() {
+            var val = (document.getElementById('asset-filter').value || '').toLowerCase()
+            var rows = document.querySelectorAll('#assets-table-body tr')
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase()
+                row.style.display = (!val || text.indexOf(val) !== -1) ? '' : 'none'
+            })
+        }
+
+        function showTab(name) {
+            // Guard: prevent viewers from accessing admin tabs
+            const adminOnly = ['assets', 'add-asset', 'users', 'settings']
+            if (adminOnly.includes(name) && window.currentUserRole !== 'admin') {
+                name = 'dashboard'
+            }
+
+            // Update tab button styles
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+            const activeTab = document.querySelector(`.tab[data-tab="${name}"]`)
+            if (activeTab) activeTab.classList.add('active')
+
+            // Hide all content panels
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none')
+
+            // Show selected panel
+            const panel = document.getElementById(`tab-${name}`)
+            if (panel) panel.style.display = 'block'
+
+            // Load data for the tab
+            if (name === 'dashboard') loadDashboard()
+            if (name === 'assets')    loadAssets()
+            if (name === 'users')     loadUsers()
+            if (name === 'settings')  loadSettings()
+        }
+
+        function daysUntil(dateStr) {
+            const ms = new Date(dateStr) - new Date()
+            return Math.floor(ms / 86400000)
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('en-GB', {
+                day:'2-digit', month:'short', year:'numeric'
+            })
+        }
+
+        function dayColor(days) {
+            if (days < 0)   return '#dc2626'
+            if (days <= 7)  return '#ea580c'
+            if (days <= 30) return '#ca8a04'
+            return '#16a34a'
+        }
+
+        function daysLabel(days) {
+            if (days < 0)  return `Expired ${Math.abs(days)}d ago`
+            if (days === 0) return 'Expires today'
+            return `${days}d left`
+        }
+
+        function statusLabel(days) {
+            if (days < 0)   return 'Expired'
+            if (days <= 30) return 'Expiring'
+            return 'Valid'
+        }
+
+        function statusBadgeClass(days) {
+            if (days < 0)   return 'badge-red'
+            if (days <= 7)  return 'badge-orange'
+            if (days <= 30) return 'badge-yellow'
+            return 'badge-green'
+        }
+
+        // Dashboard
+
+        async function editAsset(id) {
+            let a
+            try {
+                const r = await fetch('/api/v1/assets/' + id, {
+                    headers: { Authorization: 'Bearer ' + token }
+                })
+                const data = await r.json()
+                a = data.data
+                if (!a) throw new Error('no data')
+            } catch(e) {
+                alert('Could not load asset: ' + e.message)
+                return
+            }
+
+            const tagsStr    = Object.entries(a.tags || {}).map(function(e){ return e[0]+'='+e[1] }).join(',')
+            const expiryDate = a.expires_at ? a.expires_at.substring(0, 10) : ''
+            const isCert     = a.type === 'certificate'
+
+            const overlay = document.createElement('div')
+            overlay.id    = 'edit-overlay'
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);' +
+                'display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto'
+
+            const typeOptions = ['certificate','token','api_key','secret','custom'].map(function(t) {
+                return '<option value="' + t + '"' + (a.type === t ? ' selected' : '') + '>' + t + '</option>'
+            }).join('')
+
+            overlay.innerHTML =
+                '<div style="background:white;border-radius:12px;padding:32px;width:520px;' +
+                'max-width:92vw;margin:auto">' +
+                    '<h3 style="margin-bottom:20px;font-size:18px;font-weight:600">Edit Asset</h3>' +
+
+                    '<div class="form-group"><label>Name</label>' +
+                    '<input id="edit-name" value="' + a.name.replace(/"/g,'&quot;') + '"></div>' +
+
+                    '<div class="form-group"><label>Type</label>' +
+                    '<select id="edit-type" onchange="onEditTypeChange()">' + typeOptions + '</select></div>' +
+
+                    '<div class="form-group"><label>Expires At</label>' +
+                    '<input id="edit-expires" type="date" value="' + expiryDate + '"></div>' +
+
+                    '<div id="edit-pem-group" style="display:' + (isCert ? 'block' : 'none') + ';' +
+                    'border:1px solid #e2e8f0;border-radius:8px;padding:16px;background:#f8fafc;margin-bottom:12px">' +
+                        '<div class="form-group"><label>Upload New Certificate (.pem .crt .cer)</label>' +
+                        '<input id="edit-pem-file" type="file" accept=".pem,.crt,.cer,.cert"' +
+                        ' style="width:100%;padding:8px;border:2px dashed #cbd5e1;border-radius:6px;background:white;cursor:pointer"></div>' +
+                        '<div class="form-group"><label>Or paste PEM text</label>' +
+                        '<textarea id="edit-pem" rows="4" placeholder="-----BEGIN CERTIFICATE-----"></textarea></div>' +
+                        '<div id="edit-pem-hint" style="font-size:13px;margin-top:-8px;margin-bottom:8px"></div>' +
+                        '<p style="font-size:12px;color:#64748b">🔒 PEM data is never sent to the server.</p>' +
+                    '</div>' +
+
+                    '<div class="form-group"><label>Description</label>' +
+                    '<textarea id="edit-desc">' + (a.description || '') + '</textarea></div>' +
+
+                    '<div class="form-group"><label>Tags (key=value,key=value)</label>' +
+                    '<input id="edit-tags" value="' + tagsStr + '"></div>' +
+
+                    '<div id="edit-error" class="error" style="margin-bottom:8px"></div>' +
+                    '<div style="display:flex;gap:8px;margin-top:16px">' +
+                        '<button class="btn btn-primary" onclick="submitEdit(\'' + id + '\')">Save</button>' +
+                        '<button class="btn" style="background:#f1f5f9"' +
+                        ' onclick="document.getElementById(\'edit-overlay\').remove()">Cancel</button>' +
+                    '</div>' +
+                '</div>'
+
+            document.body.appendChild(overlay)
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.remove()
+            })
+
+            // Wire file input after modal is in DOM
+            var fileInput = document.getElementById('edit-pem-file')
+            var textarea  = document.getElementById('edit-pem')
+            if (fileInput && textarea) {
+                fileInput.addEventListener('change', function() {
+                    var file = this.files[0]
+                    if (!file) return
+                    var reader = new FileReader()
+                    reader.onload = function(e) {
+                        textarea.value = e.target.result
+                        tryEditPem(e.target.result)
+                    }
+                    reader.readAsText(file)
+                })
+                textarea.addEventListener('input', function() {
+                    tryEditPem(this.value)
+                })
+            }
+        }
+
+        function onEditTypeChange() {
+            var type = document.getElementById('edit-type')
+            var grp  = document.getElementById('edit-pem-group')
+            if (type && grp) grp.style.display = type.value === 'certificate' ? 'block' : 'none'
+        }
+
+        function tryEditPem(pem) {
+            var hintEl    = document.getElementById('edit-pem-hint')
+            var expiresEl = document.getElementById('edit-expires')
+            if (!pem || !pem.trim()) { if (hintEl) hintEl.textContent = ''; return }
+            var date = parsePemExpiry(pem)
+            if (date) {
+                if (expiresEl) expiresEl.value = date
+                if (hintEl) { hintEl.textContent = '✓ Expiry detected: ' + date; hintEl.style.color = '#16a34a' }
+                setTimeout(function() {
+                    var pf = document.getElementById('edit-pem-file')
+                    var pt = document.getElementById('edit-pem')
+                    if (pf) pf.value = ''
+                    if (pt) pt.value = ''
+                }, 800)
+            } else {
+                if (hintEl) { hintEl.textContent = '⚠ Enter expiry manually'; hintEl.style.color = '#ea580c' }
+            }
+        }
+
+        async function submitEdit(id) {
+            var errEl    = document.getElementById('edit-error')
+            var nameEl   = document.getElementById('edit-name')
+            var typeEl   = document.getElementById('edit-type')
+            var expiresEl= document.getElementById('edit-expires')
+            var descEl   = document.getElementById('edit-desc')
+            var tagsEl   = document.getElementById('edit-tags')
+
+            if (!nameEl || !typeEl || !expiresEl) {
+                if (errEl) errEl.textContent = 'Form elements missing'
+                return
+            }
+
+            if (!nameEl.value.trim()) { if (errEl) errEl.textContent = 'Name is required'; return }
+            if (!expiresEl.value)     { if (errEl) errEl.textContent = 'Expiry date is required'; return }
+
+            var payload = {
+                name:        nameEl.value.trim(),
+                type:        typeEl.value,
+                expires_at:  new Date(expiresEl.value + 'T00:00:00').toISOString(),
+                description: descEl ? descEl.value.trim() : '',
+                tags:        parseTags(tagsEl ? tagsEl.value : ''),
+                metadata:    {}
+            }
+
+            try {
+                var r = await fetch('/api/v1/assets/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                })
+                var data = await r.json()
+                if (!r.ok || data.error) {
+                    if (errEl) errEl.textContent = userError(data.error) || 'Save failed'
+                    return
+                }
+                var overlay = document.getElementById('edit-overlay')
+                if (overlay) overlay.remove()
+                loadAssets()
+            } catch(e) {
+                if (errEl) errEl.textContent = 'Network error: ' + e.message
+            }
+        }
+
+        function deleteAsset(id, name) {
+            const overlay = document.createElement('div')
+            overlay.id = 'delete-overlay'
+            overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);
+                display:flex;align-items:center;justify-content:center;z-index:1000`
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:32px;width:380px;text-align:center">
+                    <p style="margin-bottom:8px;font-size:16px;font-weight:600">Delete Asset?</p>
+                    <p style="color:#64748b;margin-bottom:24px">"${name}" will be permanently deleted.</p>
+                    <div style="display:flex;gap:8px;justify-content:center">
+                        <button class="btn btn-danger" onclick="confirmDelete('${id}')">Delete</button>
+                        <button class="btn" onclick="document.getElementById('delete-overlay').remove()"
+                            style="background:#f1f5f9">Cancel</button>
+                    </div>
+                </div>`
+            document.body.appendChild(overlay)
+        }
+
+        async function confirmDelete(id) {
+            const r = await fetch(`/api/v1/assets/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            document.getElementById('delete-overlay')?.remove()
+            if (r.ok) loadAssets()
+            else alert('Delete failed')
+        }
+
+        async function deleteAsset(id) {
+            if (!confirm('Delete this asset?')) return
+            await api('DELETE', `/assets/${id}`)
+            loadAssets()
+        }
+
+        function silenceAsset(id, name) {
+            const overlay = document.createElement('div')
+            overlay.id = 'silence-overlay'
+            overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);
+                display:flex;align-items:center;justify-content:center;z-index:1000`
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:32px;width:420px;max-width:92vw">
+                    <h3 style="margin-bottom:8px;font-size:18px;font-weight:600">🔕 Silence Alerts</h3>
+                    <p style="color:#64748b;font-size:13px;margin-bottom:16px">
+                        No alerts will be sent for "<strong>${name}</strong>" while silenced.
+                    </p>
+                    <div class="form-group"><label>Duration</label>
+                        <select id="silence-duration">
+                            <option value="">Until manually unsilenced</option>
+                            <option value="1h">1 hour</option>
+                            <option value="24h">24 hours</option>
+                            <option value="168h">7 days</option>
+                            <option value="720h">30 days</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Note (optional)</label>
+                        <input id="silence-note" placeholder="e.g. renewal in progress"></div>
+                    <div style="display:flex;gap:8px;margin-top:16px">
+                        <button class="btn btn-primary" onclick="confirmSilence('${id}')">Silence</button>
+                        <button class="btn" style="background:#f1f5f9"
+                            onclick="document.getElementById('silence-overlay').remove()">Cancel</button>
+                    </div>
+                </div>`
+            document.body.appendChild(overlay)
+            overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove() })
+        }
+
+        async function confirmSilence(id) {
+            const duration = document.getElementById('silence-duration').value
+            const note     = document.getElementById('silence-note').value.trim()
+            const r = await fetch(`/api/v1/assets/${id}/silence`, {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify({ expires_in: duration, note })
+            })
+            document.getElementById('silence-overlay')?.remove()
+            if (r.ok) loadAssets()
+            else alert('Failed to silence asset')
+        }
+
+        async function unsilenceAsset(id) {
+            const r = await fetch(`/api/v1/assets/${id}/silence`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (r.ok) loadAssets()
+            else alert('Failed to unsilence asset')
+        }
+
+        async function submitAsset() {
+            // ... collect form values ...
+            const payload = {
+                name:        document.getElementById('asset-name').value.trim(),
+                type:        document.getElementById('asset-type').value,
+                expires_at:  document.getElementById('asset-expires').value
+                                ? new Date(document.getElementById('asset-expires').value + 'T00:00:00').toISOString()
+                                : undefined,
+                description: document.getElementById('asset-desc').value.trim(),
+                tags:        parseTags(document.getElementById('asset-tags').value),
+                metadata:    {}
+            }
+
+            if (!payload.name) {
+                document.getElementById('asset-form-error').textContent = 'Name is required'
+                return
+            }
+            if (!payload.type) {
+                document.getElementById('asset-form-error').textContent = 'Type is required'
+                return
+            }
+
+            const r = await fetch('/api/v1/assets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            })
+            const data = await r.json()
+            if (!r.ok || data.error) {
+                document.getElementById('asset-form-error').textContent = data.error || 'Failed to create asset'
+                return
+            }
+
+            // Success — reset form and switch to assets tab
+            document.getElementById('add-asset-form').reset()
+            document.getElementById('asset-form-success').textContent = 'Asset created!'
+            document.getElementById('pem-group').style.display = 'none'
+            setTimeout(() => {
+                document.getElementById('asset-form-success').textContent = ''
+                showTab('assets')
+            }, 1200)
+        }
+
+        function parseTags(str) {
+            const tags = {}
+            if (!str.trim()) return tags
+            str.split(',').forEach(pair => {
+                const [k, v] = pair.split('=')
+                if (k && v) tags[k.trim()] = v.trim()
+            })
+            return tags
+        }
+
+        // Users
+        async function loadUsers() {
+            const r = await fetch('/api/v1/users', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (!r.ok) return
+            const data = await r.json()
+            const users = data.data ?? []
+
+            const tbody = document.getElementById('users-table-body')
+            if (!tbody) return
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:32px">No users found.</td></tr>'
+                return
+            }
+            tbody.innerHTML = users.map(u => {
+                const isSelf = (() => { try { return JSON.parse(atob(token.split('.')[1])).uid === u.id } catch(e){return false} })()
+                const isRoot = u.is_root === true
+                return `<tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge badge-${u.auth_method==='local'?'blue':u.auth_method==='oidc'?'purple':'green'}">${u.auth_method}</span></td>
+                    <td><span class="badge badge-${u.role==='admin'?'orange':'gray'}">${u.role||'viewer'}</span></td>
+                    <td>${u.last_login ? formatDate(u.last_login) : 'Never'}</td>
+                    <td style="display:flex;gap:6px">
+                        <button class="btn btn-sm" onclick="editUser('${u.id}','${u.username}','${u.email}','${u.role||'viewer'}',${isRoot})">Edit</button>
+                        ${isRoot ? `<span class="badge badge-orange" title="Root user — protected" style="padding:4px 8px;font-size:11px">root</span>` :
+                        `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}','${u.username}')" ${isSelf ? 'disabled' : ''}>Delete</button>`}
+                    </td>
+                </tr>`
+            }).join('')
+        }
+
+        function toggleCreateUser() {
+            const form = document.getElementById('create-user-form')
+            form.style.display = form.style.display === 'none' ? 'block' : 'none'
+            document.getElementById('create-user-error').textContent = ''
+            document.getElementById('create-user-success').textContent = ''
+        }
+
+        async function submitCreateUser() {
+            const username = document.getElementById('new-username').value.trim()
+            const email    = document.getElementById('new-email').value.trim()
+            const password = document.getElementById('new-password').value
+            const errEl    = document.getElementById('create-user-error')
+            const okEl     = document.getElementById('create-user-success')
+
+            errEl.textContent = ''
+            okEl.textContent  = ''
+
+            if (!username || !email || !password) {
+                errEl.textContent = 'All fields are required'
+                return
+            }
+            if (password.length < 8) {
+                errEl.textContent = 'Password must be at least 8 characters'
+                return
+            }
+
+            const r = await fetch('/api/v1/users', {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify({ username, email, password })
+            })
+            const data = await r.json()
+            if (!r.ok || data.error) {
+                errEl.textContent = userError(data.error) || 'Failed to create user'
+                return
+            }
+            okEl.textContent = `User "${username}" created successfully`
+            document.getElementById('new-username').value = ''
+            document.getElementById('new-email').value    = ''
+            document.getElementById('new-password').value = ''
+            setTimeout(() => {
+                toggleCreateUser()
+                loadUsers()
+            }, 1500)
+        }
+
+        async function toggleRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'viewer' : 'admin'
+            if (!confirm(`Change this user to ${newRole}?`)) return
+            const r = await fetch(`/api/v1/users/${id}/role`, {
+                method: 'PUT',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify({ role: newRole })
+            })
+            const data = await r.json()
+            if (!r.ok || data.error) { alert(data.error || 'Failed to change role'); return }
+            loadUsers()
+        }
+
+        function editUser(id, currentUsername, currentEmail, currentRole, isRoot) {
+            const overlay = document.createElement('div')
+            overlay.id = 'edit-user-overlay'
+            overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);
+                display:flex;align-items:center;justify-content:center;z-index:1000`
+
+            const roleSection = isRoot ? `
+                <div class="form-group"><label>Role</label>
+                    <div style="padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;
+                         border-radius:6px;color:#64748b;font-size:14px">
+                        Admin <span style="font-size:12px;color:#94a3b8">(root — cannot be changed)</span>
+                    </div>
+                </div>` : `
+                <div class="form-group"><label>Role</label>
+                    <select id="eu-role">
+                        <option value="viewer" ${currentRole==='viewer'?'selected':''}>Viewer — Dashboard only</option>
+                        <option value="admin"  ${currentRole==='admin' ?'selected':''}>Admin — Full access</option>
+                    </select>
+                </div>`
+
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:32px;width:420px;max-width:92vw">
+                    <h3 style="margin-bottom:20px;font-size:18px;font-weight:600">Edit User</h3>
+                    <div class="form-group"><label>Username</label>
+                        <input id="eu-username" value="${currentUsername}"></div>
+                    <div class="form-group"><label>Email</label>
+                        <input id="eu-email" type="email" value="${currentEmail}"></div>
+                    ${roleSection}
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
+                    <p style="font-size:13px;color:#64748b;margin-bottom:12px">
+                        Change Password <span style="font-weight:400">(leave blank to keep current)</span>
+                    </p>
+                    <div class="form-group"><label>New Password</label>
+                        <input id="eu-password" type="password" placeholder="min 8 characters"></div>
+                    <div class="form-group"><label>Confirm Password</label>
+                        <input id="eu-password2" type="password" placeholder="repeat new password"></div>
+                    <div id="eu-error" class="error" style="margin-bottom:8px"></div>
+                    <div style="display:flex;gap:8px;margin-top:16px">
+                        <button class="btn btn-primary" onclick="submitEditUser('${id}')">Save</button>
+                        <button class="btn" style="background:#f1f5f9"
+                            onclick="document.getElementById('edit-user-overlay').remove()">Cancel</button>
+                    </div>
+                </div>`
+            document.body.appendChild(overlay)
+            overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove() })
+        }
+
+        async function submitEditUser(id) {
+            const username = document.getElementById('eu-username').value.trim()
+            const email    = document.getElementById('eu-email').value.trim()
+            const roleEl   = document.getElementById('eu-role')
+            const role     = roleEl ? roleEl.value : null
+            const password = document.getElementById('eu-password').value
+            const password2 = document.getElementById('eu-password2').value
+            const errEl    = document.getElementById('eu-error')
+            if (!username || !email) { errEl.textContent = 'All fields required'; return }
+            if (password && password.length < 8) { errEl.textContent = 'Password must be at least 8 characters'; return }
+            if (password && password !== password2) { errEl.textContent = 'Passwords do not match'; return }
+
+            // Save username + email
+            const r1 = await fetch(`/api/v1/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify({ username, email })
+            })
+            const d1 = await r1.json()
+            if (!r1.ok || d1.error) { errEl.textContent = d1.error || 'Failed to save'; return }
+
+            // Save role only if the role field exists (not for root users)
+            if (role) {
+                const r2 = await fetch(`/api/v1/users/${id}/role`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                    body: JSON.stringify({ role })
+                })
+                const d2 = await r2.json()
+                if (!r2.ok || d2.error) { errEl.textContent = d2.error || 'Failed to update role'; return }
+            }
+
+            // Save password if provided
+            if (password) {
+                const r3 = await fetch(`/api/v1/users/${id}/password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                    body: JSON.stringify({ password })
+                })
+                const d3 = await r3.json()
+                if (!r3.ok || d3.error) { errEl.textContent = d3.error || 'Failed to update password'; return }
+            }
+
+            document.getElementById('edit-user-overlay').remove()
+            loadUsers()
+        }
+
+        function deleteUser(id, username) {
+            const overlay = document.createElement('div')
+            overlay.id = 'delete-user-overlay'
+            overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);
+                display:flex;align-items:center;justify-content:center;z-index:1000`
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:32px;width:360px;text-align:center">
+                    <p style="font-size:16px;font-weight:600;margin-bottom:8px">Delete User?</p>
+                    <p style="color:#64748b;margin-bottom:24px">"${username}" will be permanently removed.</p>
+                    <div style="display:flex;gap:8px;justify-content:center">
+                        <button class="btn btn-danger" onclick="confirmDeleteUser('${id}')">Delete</button>
+                        <button class="btn" style="background:#f1f5f9"
+                            onclick="document.getElementById('delete-user-overlay').remove()">Cancel</button>
+                    </div>
+                </div>`
+            document.body.appendChild(overlay)
+        }
+
+        async function confirmDeleteUser(id) {
+            const r = await fetch(`/api/v1/users/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            document.getElementById('delete-user-overlay')?.remove()
+            if (r.ok) loadUsers()
+            else alert('Delete failed')
+        }
+
+        // Settings
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId)
+            const toggleId = sectionId.replace('section', 'toggle').replace('-section', '-toggle')
+            const toggle = document.getElementById(toggleId)
+
+            if (!section || !toggle) return
+
+            section.classList.toggle('collapsed')
+            toggle.classList.toggle('open')
+        }
+
+        async function loadSettings() {
+            try {
+                const r = await fetch('/api/v1/settings', {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                if (r.status === 403) {
+                    document.getElementById('tab-settings').innerHTML =
+                        '<div style="padding:40px;text-align:center;color:#94a3b8">Admin access required to view settings.</div>'
+                    return
+                }
+                const data = await r.json()
+                const s = data.data
+
+                document.getElementById('oidc-enabled').checked   = s.oidc_enabled
+                document.getElementById('oidc-issuer').value      = s.oidc_issuer || ''
+                document.getElementById('oidc-client-id').value   = s.oidc_client_id || ''
+                document.getElementById('oidc-client-secret').placeholder =
+                    s.oidc_client_secret ? 'leave blank to keep existing' : 'enter client secret'
+
+                document.getElementById('ldap-enabled').checked        = s.ldap_enabled
+                document.getElementById('ldap-url').value              = s.ldap_url || ''
+                document.getElementById('ldap-bind-dn').value          = s.ldap_bind_dn || ''
+                document.getElementById('ldap-bind-password').placeholder =
+                    s.ldap_bind_password ? 'leave blank to keep existing' : 'enter bind password'
+                document.getElementById('ldap-base-dn').value          = s.ldap_base_dn || ''
+                document.getElementById('ldap-user-filter').value      = s.ldap_user_filter || '(uid=%s)'
+
+                toggleOIDCFields()
+                toggleLDAPFields()
+                loadAlertSettings()
+            } catch(e) {
+                log.error('loadSettings error:', e)
+            }
+        }
+
+        function toggleOIDCFields() {
+            const enabled = document.getElementById('oidc-enabled').checked
+            document.getElementById('oidc-fields').style.display = enabled ? 'block' : 'none'
+        }
+
+        function toggleLDAPFields() {
+            const enabled = document.getElementById('ldap-enabled').checked
+            document.getElementById('ldap-fields').style.display = enabled ? 'block' : 'none'
+        }
+
+        async function saveSettings() {
+            const errEl = document.getElementById('settings-error')
+            const okEl  = document.getElementById('settings-success')
+            errEl.textContent = ''
+            okEl.textContent  = ''
+
+            const payload = {
+                oidc_enabled:       document.getElementById('oidc-enabled').checked,
+                oidc_issuer:        document.getElementById('oidc-issuer').value.trim(),
+                oidc_client_id:     document.getElementById('oidc-client-id').value.trim(),
+                oidc_client_secret: document.getElementById('oidc-client-secret').value,
+                ldap_enabled:       document.getElementById('ldap-enabled').checked,
+                ldap_url:           document.getElementById('ldap-url').value.trim(),
+                ldap_bind_dn:       document.getElementById('ldap-bind-dn').value.trim(),
+                ldap_bind_password: document.getElementById('ldap-bind-password').value,
+                ldap_base_dn:       document.getElementById('ldap-base-dn').value.trim(),
+                ldap_user_filter:   document.getElementById('ldap-user-filter').value.trim(),
+            }
+
+            const r = await fetch('/api/v1/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify(payload)
+            })
+            const data = await r.json()
+            if (!r.ok || data.error) {
+                errEl.textContent = userError(data.error) || 'Failed to save settings'
+                return
+            }
+            okEl.textContent = '✓ Settings saved successfully'
+            setTimeout(() => { okEl.textContent = '' }, 3000)
+        }
+
+        const DEFAULT_TEMPLATES = {
+            warning:  "⚠️ *{asset_name}* is expiring in *{days_left} days*\nType: {asset_type}\nExpires: {expires_at}\nEnvironment: {env}",
+            critical: "🚨 *{asset_name}* expires in *{days_left} days* — ACTION REQUIRED\nType: {asset_type}\nExpires: {expires_at}\nEnvironment: {env}",
+            expired:  "☠️ *{asset_name}* has EXPIRED\nType: {asset_type}\nExpired: {expires_at}\nEnvironment: {env}"
+        }
+
+        function resetTemplates() {
+            document.getElementById('alert-template-warning').value  = DEFAULT_TEMPLATES.warning
+            document.getElementById('alert-template-critical').value = DEFAULT_TEMPLATES.critical
+            document.getElementById('alert-template-expired').value  = DEFAULT_TEMPLATES.expired
+        }
+
+        async function loadAlertSettings() {
+            try {
+                const r = await fetch('/api/v1/settings/alerts', {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                if (!r.ok) return
+                const data = await r.json()
+                const s = data.data
+
+                document.getElementById('alert-warning-days').value  = s.warning_days  || 30
+                document.getElementById('alert-critical-days').value = s.critical_days || 7
+
+                const intervalEl = document.getElementById('alert-interval')
+                if (intervalEl) intervalEl.value = s.interval || '1h'
+
+                document.getElementById('alert-slack-webhook').value     = s.slack_webhook     || ''
+                document.getElementById('alert-slack-channel').value     = s.slack_channel     || ''
+                document.getElementById('alert-mattermost-webhook').value = s.mattermost_webhook || ''
+                document.getElementById('alert-mattermost-channel').value = s.mattermost_channel || ''
+                document.getElementById('alert-webhook-url').value       = s.webhook_url       || ''
+                document.getElementById('alert-telegram-chat-id').value  = s.telegram_chat_id  || ''
+
+                // Masked secrets — show placeholder
+                const maskedFields = [
+                    ['alert-slack-token',       s.slack_token],
+                    ['alert-mattermost-token',  s.mattermost_token],
+                    ['alert-telegram-token',    s.telegram_token],
+                ]
+                maskedFields.forEach(([id, val]) => {
+                    const el = document.getElementById(id)
+                    if (el) el.placeholder = val ? 'leave blank to keep existing' : 'not set'
+                })
+
+                document.getElementById('alert-template-warning').value  =
+                    s.template_warning  || DEFAULT_TEMPLATES.warning
+                document.getElementById('alert-template-critical').value =
+                    s.template_critical || DEFAULT_TEMPLATES.critical
+                document.getElementById('alert-template-expired').value  =
+                    s.template_expired  || DEFAULT_TEMPLATES.expired
+            } catch(e) { log.error('loadAlertSettings:', e) }
+        }
+
+        async function saveAlertSettings() {
+            const errEl = document.getElementById('alert-settings-error')
+            const okEl  = document.getElementById('alert-settings-success')
+            errEl.textContent = ''
+            okEl.textContent  = ''
+
+            const payload = {
+                warning_days:        parseInt(document.getElementById('alert-warning-days').value)  || 30,
+                critical_days:       parseInt(document.getElementById('alert-critical-days').value) || 7,
+                interval:            document.getElementById('alert-interval').value,
+                slack_webhook:       document.getElementById('alert-slack-webhook').value.trim(),
+                slack_token:         document.getElementById('alert-slack-token').value,
+                slack_channel:       document.getElementById('alert-slack-channel').value.trim(),
+                mattermost_webhook:  document.getElementById('alert-mattermost-webhook').value.trim(),
+                mattermost_token:    document.getElementById('alert-mattermost-token').value,
+                mattermost_channel:  document.getElementById('alert-mattermost-channel').value.trim(),
+                webhook_url:         document.getElementById('alert-webhook-url').value.trim(),
+                telegram_token:      document.getElementById('alert-telegram-token').value,
+                telegram_chat_id:    document.getElementById('alert-telegram-chat-id').value.trim(),
+                template_warning:    document.getElementById('alert-template-warning').value,
+                template_critical:   document.getElementById('alert-template-critical').value,
+                template_expired:    document.getElementById('alert-template-expired').value,
+            }
+
+            const r = await fetch('/api/v1/settings/alerts', {
+                method: 'PUT',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                body: JSON.stringify(payload)
+            })
+            const data = await r.json()
+            if (!r.ok || data.error) {
+                errEl.textContent = userError(data.error) || 'Failed to save'
+                return
+            }
+            okEl.textContent = '✓ Alert settings saved'
+            setTimeout(() => { okEl.textContent = '' }, 3000)
+        }
+
+        async function testAlert(channel) {
+            const resultEl = document.getElementById(`test-${channel}-result`)
+            if (resultEl) { resultEl.textContent = 'Sending...'; resultEl.style.color = '#64748b' }
+
+            try {
+                if (!token) {
+                    if (resultEl) {
+                        resultEl.textContent = '✗ Not authenticated'
+                        resultEl.style.color = '#dc2626'
+                        setTimeout(() => { resultEl.textContent = '' }, 4000)
+                    }
+                    return
+                }
+                const r = await fetch('/api/v1/settings/alerts/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+                    body: JSON.stringify({ channel }),
+                    signal: AbortSignal.timeout(15000)
+                })
+                if (!r.ok && (r.status === 401 || r.status === 403)) {
+                    if (resultEl) {
+                        resultEl.textContent = '✗ Not authorized'
+                        resultEl.style.color = '#dc2626'
+                        setTimeout(() => { resultEl.textContent = '' }, 4000)
+                    }
+                    return
+                }
+                const data = await r.json()
+                if (resultEl) {
+                    if (r.ok && !data.error) {
+                        resultEl.textContent = '✓ Sent!'
+                        resultEl.style.color = '#16a34a'
+                    } else {
+                        resultEl.textContent = '✗ ' + (data.error || 'Failed')
+                        resultEl.style.color = '#dc2626'
+                    }
+                    setTimeout(() => { resultEl.textContent = '' }, 4000)
+                }
+            } catch (e) {
+                if (resultEl) {
+                    resultEl.textContent = '✗ ' + (e.name === 'AbortError' ? 'Timeout' : e.message)
+                    resultEl.style.color = '#dc2626'
+                    setTimeout(() => { resultEl.textContent = '' }, 4000)
+                }
+            }
+        }
+
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId)
+            el.textContent = message
+            el.className = type === 'error' ? 'error' : 'success'
+        }
+
+        function showSetup() {
+            document.getElementById('setup-screen').classList.remove('hidden')
+            document.getElementById('login-screen').classList.add('hidden')
+            document.getElementById('app-screen').classList.add('hidden')
+        }
+
+        async function loadAuthMethods() {
+            try {
+                const r = await fetch('/api/v1/auth/methods')
+                const data = await r.json()
+                const methods = data.data?.methods ?? []
+                const oidcUrl = data.data?.oidc_login_url ?? ''
+
+                const oidcBtn = document.getElementById('oidc-login-btn')
+                if (oidcBtn) {
+                    if (oidcUrl) {
+                        oidcBtn.style.display = 'block'
+                        oidcBtn.onclick = () => window.location.href = oidcUrl
+                    } else {
+                        oidcBtn.style.display = 'none'
+                    }
+                }
+            } catch(e) { /* OIDC not configured, hide button */ }
+        }
+
+        async function loadLogo() {
+            try {
+                const r = await fetch('/logo')
+                log.info('Logo fetch response:', r.status, r.ok)
+                if (!r.ok) {
+                    log.info('Logo fetch failed:', r.status)
+                    return
+                }
+                const blob = await r.blob()
+                log.info('Logo blob received:', blob.size, blob.type)
+                const url = URL.createObjectURL(blob)
+                log.info('Logo object URL created:', url)
+                const logoImgs = document.querySelectorAll('.app-logo-img')
+                log.info('Found logo images:', logoImgs.length)
+                logoImgs.forEach(el => {
+                    el.src = url
+                    el.style.display = 'block'
+                    log.info('Logo image set:', el.src.substring(0, 50))
+                })
+            } catch(e) {
+                log.error('Logo loading error:', e)
+            }
+        }
+
+        async function checkSetup() {
+            await loadLogo()
+            try {
+                const res = await fetch('/setup/status')
+                const data = await res.json()
+                if (!data.data.setup_completed) {
+                    showSetup()
+                } else if (token) {
+                    showApp()
+                } else {
+                    showLogin()
+                    loadAuthMethods()
+                }
+            } catch (e) {
+                log.error('Failed to check setup:', e)
+                // Fallback: show login screen
+                showLogin()
+            }
+        }
+
+        async function submitSetup() {
+            const username = document.getElementById('setup-username').value
+            const email = document.getElementById('setup-email').value
+            const password = document.getElementById('setup-password').value
+            const confirm = document.getElementById('setup-confirm').value
+
+            if (password !== confirm) {
+                document.getElementById('setup-error').textContent = 'Passwords do not match'
+                return
+            }
+
+            const r = await fetch('/setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            })
+            const data = await r.json()
+            if (data.error) {
+                document.getElementById('setup-error').textContent = data.error
+                return
+            }
+            token = data.data.token
+            localStorage.setItem('vw_token', token)
+            showApp()
+        }
+
+        function parsePemExpiry(pem) {
+            try {
+                // Strip PEM headers and whitespace to get clean base64
+                const base64 = pem
+                    .replace(/-----BEGIN CERTIFICATE-----/, '')
+                    .replace(/-----END CERTIFICATE-----/, '')
+                    .replace(/-----BEGIN [A-Z ]+-----/, '')
+                    .replace(/-----END [A-Z ]+-----/, '')
+                    .replace(/[\r\n\t ]/g, '')
+
+                if (!base64) return null
+
+                // Decode base64 to byte array
+                const binary = atob(base64)
+                const bytes  = new Uint8Array(binary.length)
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+
+                // Walk ASN.1 DER to find the validity sequence
+                // Structure: SEQUENCE (cert) > SEQUENCE (tbs) > ... > SEQUENCE (validity) > UTCTime/GenTime x2
+                // We find ALL UTCTime (0x17) and GeneralizedTime (0x18) tags and take index 0=notBefore, 1=notAfter
+                const times = []
+                let i = 0
+
+                function readLength(pos) {
+                    const first = bytes[pos]
+                    if ((first & 0x80) === 0) return { len: first, nextPos: pos + 1 }
+                    const numBytes = first & 0x7f
+                    let len = 0
+                    for (let j = 0; j < numBytes; j++) len = (len << 8) | bytes[pos + 1 + j]
+                    return { len, nextPos: pos + 1 + numBytes }
+                }
+
+                function walk(pos, end) {
+                    while (pos < end) {
+                        if (pos >= bytes.length) break
+                        const tag = bytes[pos]
+                        if (pos + 1 >= bytes.length) break
+                        const { len, nextPos } = readLength(pos + 1)
+                        const contentStart = nextPos
+                        const contentEnd   = contentStart + len
+
+                        if (tag === 0x17 || tag === 0x18) {
+                            // UTCTime or GeneralizedTime
+                            const str = String.fromCharCode(...bytes.slice(contentStart, contentEnd))
+                            times.push({ tag, str })
+                        } else if ((tag & 0x20) !== 0) {
+                            // Constructed — recurse into it
+                            walk(contentStart, contentEnd)
+                        }
+                        pos = contentEnd
+                        if (pos <= nextPos) break // safety: avoid infinite loop
+                    }
+                }
+
+                walk(0, bytes.length)
+
+                // times[0] = notBefore, times[1] = notAfter
+                if (times.length < 2) return null
+
+                const { tag, str } = times[1] // notAfter
+                let year, month, day
+
+                if (tag === 0x17) {
+                    // UTCTime: YYMMDDHHMMSSZ
+                    const yy = parseInt(str.substring(0, 2), 10)
+                    year  = yy >= 50 ? 1900 + yy : 2000 + yy
+                    month = str.substring(2, 4)
+                    day   = str.substring(4, 6)
+                } else {
+                    // GeneralizedTime: YYYYMMDDHHMMSSZ
+                    year  = str.substring(0, 4)
+                    month = str.substring(4, 6)
+                    day   = str.substring(6, 8)
+                }
+
+                // Validate the result looks sane
+                const result = `${year}-${month}-${day}`
+                const parsed = new Date(result)
+                if (isNaN(parsed.getTime())) return null
+
+                return result
+
+            } catch(e) {
+                log.error('parsePemExpiry error:', e)
+                return null
+            }
+        }
+
+        function onAssetTypeChange() {
+            const type = document.getElementById('asset-type').value
+            const pemGroup = document.getElementById('pem-group')
+            if (!pemGroup) return
+            if (type === 'certificate') {
+                pemGroup.style.display = 'block'
+            } else {
+                pemGroup.style.display = 'none'
+                const pf = document.getElementById('asset-pem-file')
+                const pt = document.getElementById('asset-pem')
+                const ph = document.getElementById('pem-hint')
+                if (pf) pf.value = ''
+                if (pt) pt.value = ''
+                if (ph) ph.textContent = ''
+            }
+        }
+
+        function tryParsePem(pem) {
+            const hintEl = document.getElementById('pem-hint')
+            if (!pem || !pem.trim()) { if (hintEl) hintEl.textContent = ''; return }
+            const date = parsePemExpiry(pem)
+            const expiresInput = document.getElementById('asset-expires')
+            if (date) {
+                if (expiresInput) expiresInput.value = date
+                if (hintEl) { hintEl.textContent = '✓ Expiry detected: ' + date + ' — certificate cleared for security'; hintEl.style.color = '#16a34a' }
+                setTimeout(() => {
+                    const pemFile = document.getElementById('asset-pem-file')
+                    const pemText = document.getElementById('asset-pem')
+                    if (pemFile) pemFile.value = ''
+                    if (pemText) pemText.value = ''
+                }, 800)
+            } else {
+                if (hintEl) { hintEl.textContent = '⚠ Could not detect expiry — enter manually'; hintEl.style.color = '#ea580c' }
+            }
+        }
+
+        function initPemFileInput() {
+            const fileInput = document.getElementById('asset-pem-file')
+            const textarea  = document.getElementById('asset-pem')
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = this.files[0]
+                    if (!file) return
+                    const reader = new FileReader()
+                    reader.onload = function(e) {
+                        if (textarea) textarea.value = e.target.result
+                        tryParsePem(e.target.result)
+                    }
+                    reader.readAsText(file)
+                })
+            }
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    tryParsePem(this.value)
+                })
+            }
+        }
+
+        // Init
+        checkSetup()
+        initPemFileInput()
+    </script>
+</body>
+</html>

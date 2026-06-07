@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk ls *)",
+      "Bash(go get *)",
+      "Bash(go version *)",
+      "Bash(rtk go *)",
+      "Bash(go mod *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk helm *)",
+      "Bash(python3 -c \"import json,sys; json.load\\(open\\('/home/chr/payrad/sotoon-v2/vaultwatch/docs/grafana-dashboard.json'\\)\\)\")",
+      "Bash(python3 -c \"import yaml; yaml.safe_load\\(open\\('/home/chr/payrad/sotoon-v2/vaultwatch/docs/prometheus.yml'\\)\\)\")",
+      "Bash(python3 -c \"import yaml; yaml.safe_load\\(open\\('/home/chr/payrad/sotoon-v2/vaultwatch/docker-compose.dev.yml'\\)\\)\")",
+      "Bash(rtk find *)",
+      "Bash(docker compose *)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(rtk curl *)",
+      "Bash(rtk ps *)",
+      "Bash(rtk read *)",
+      "Bash(pkill -9 go)",
+      "Bash(rtk docker *)",
+      "Bash(pg_isready -h localhost -U vaultwatch -d vaultwatch)",
+      "Bash(go install *)",
+      "Bash(docker exec *)",
+      "Bash(killall -9 go)",
+      "Bash(docker rm *)",
+      "Bash(docker run *)",
+      "Bash(export VAULTWATCH_PORT=8080)",
+      "Bash(export VAULTWATCH_LOG_LEVEL=debug)",
+      "Bash(export VAULTWATCH_DB_URL=\"postgres://vaultwatch:devpassword@localhost:5432/vaultwatch?sslmode=disable\")",
+      "Bash(export VAULTWATCH_JWT_SECRET=\"dev-secret-key-change-in-prod\")",
+      "Bash(export VAULTWATCH_AUTH_METHODS=\"local\")",
+      "Bash(export VAULTWATCH_CHECK_INTERVAL=\"1m\")",
+      "Bash(export VAULTWATCH_WARN_DAYS=\"30,14,7,1\")",
+      "Bash(nohup go run ./main.go)",
+      "Bash(curl -s http://localhost:8080/readyz)"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  # ── App ──────────────────────────────────────────────────────
+  app:
+    image: keywatcher:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./bin/keywatcher:/keywatcher:ro
+      - ./internal/server/static:/internal/server/static:ro
+      - ./assets:/assets:ro
+    environment:
+      VAULTWATCH_PORT: "8080"
+      VAULTWATCH_LOG_LEVEL: "info"
+      VAULTWATCH_DB_URL: "postgres://keywatcher:devpassword@postgres:5432/keywatcher?sslmode=disable"
+      VAULTWATCH_JWT_SECRET: "dev-secret-change-in-production-must-be-32-chars"
+      VAULTWATCH_AUTH_METHODS: "local"
+      VAULTWATCH_CHECK_INTERVAL: "1m"
+      VAULTWATCH_WARN_DAYS: "30,14,7,1"
+      VAULTWATCH_COOKIE_SECURE: "false"
+      VAULTWATCH_METRICS_TOKEN: "dev-metrics-token-for-testing"
+      # Uncomment to test notifications locally:
+      # VAULTWATCH_NOTIFY_SLACK_WEBHOOK: "https://hooks.slack.com/..."
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Database ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: keywatcher
+      POSTGRES_USER: keywatcher
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"           # expose so you can connect with psql or DBeaver
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keywatcher"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Prometheus ───────────────────────────────────────────────
+  prometheus:
+    image: repo.payrad.org/prom/prometheus:v3
+    volumes:
+      - ./docs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+
+volumes:
+  pgdata:

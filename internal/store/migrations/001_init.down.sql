@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS notification_log;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS assets;
+DROP TYPE  IF EXISTS asset_type;

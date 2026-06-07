@@ -1,0 +1,72 @@
+replicaCount: 2
+
+image:
+  repository: your-registry/keywatcher
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+serviceMonitor:
+  enabled: false   # set true if Prometheus Operator is installed
+
+ingress:
+  enabled: false
+  className: ""
+  host: keywatcher.example.com
+  tls: false
+
+config:
+  logLevel: info
+  authMethods: "local"
+  jwtSecretName: keywatcher-jwt          # k8s secret name
+  jwtSecretKey: jwt-secret               # key inside the secret
+
+  expiry:
+    checkInterval: "1h"
+    warnDays: "30,14,7,1"
+
+  notifications:
+    slackWebhookSecretName: ""           # k8s secret name (leave empty to disable)
+    mattermostWebhookSecretName: ""
+    genericWebhookSecretName: ""
+
+postgresql:
+  host: postgres
+  port: 5432
+  database: keywatcher
+  sslMode: require
+  secretName: keywatcher-db             # k8s secret name
+  secretKey: database-url               # key inside the secret holding full DSN
+
+oidc:
+  enabled: false
+  issuer: ""
+  clientID: ""
+  clientSecretName: ""
+  clientSecretKey: ""
+
+ldap:
+  enabled: false
+  url: ""
+  bindDN: ""
+  baseDN: ""
+  userFilter: "(uid=%s)"
+  bindPasswordSecretName: ""
+  bindPasswordSecretKey: ""
