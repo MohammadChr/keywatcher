@@ -3,13 +3,12 @@ version: "3.9"
 services:
   # ── App ──────────────────────────────────────────────────────
   app:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
     image: keywatcher:latest
     ports:
       - "8080:8080"
-    volumes:
-      - ./bin/keywatcher:/keywatcher:ro
-      - ./internal/server/static:/internal/server/static:ro
-      - ./assets:/assets:ro
     environment:
       KEYWATCHER_PORT: "8080"
       KEYWATCHER_LOG_LEVEL: "info"
@@ -48,15 +47,15 @@ services:
       retries: 5
 
   # ── Prometheus ───────────────────────────────────────────────
-  prometheus:
-    image: repo.payrad.org/prom/prometheus:v3
-    volumes:
-      - ./docs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.retention.time=7d"
+#   prometheus:
+#     image: repo.payrad.org/prom/prometheus:v3
+#     volumes:
+#       - ./docs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#     ports:
+#       - "9090:9090"
+#     command:
+#       - "--config.file=/etc/prometheus/prometheus.yml"
+#       - "--storage.tsdb.retention.time=7d"
 
 volumes:
   pgdata:
