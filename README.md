@@ -58,6 +58,25 @@ make dev
 Import `docs/grafana-dashboard.json` into Grafana → Dashboards → Import.
 Point to your Prometheus datasource.
 
+## Versioning
+
+KeyWatcher uses semantic versioning (MAJOR.MINOR.PATCH).
+
+- **VERSION file**: Contains current version (e.g., `v0.1.0`)
+- **Docker image tags**: Always use specific version, never `latest` (e.g., `keywatcher:v0.1.0`)
+- **Bump patch**: `make version-bump-patch` (bug fixes)
+- **Bump minor**: `make version-bump-minor` (new features)
+- **Current version**: `make version`
+
+When updating the version:
+```bash
+make version-bump-minor  # Update VERSION file
+git add VERSION docker-compose.dev.yml
+git commit -m "chore: bump to vX.Y.Z"
+git tag vX.Y.Z
+git push origin main --tags
+```
+
 ## Deploy to Kubernetes
 
 ```bash
@@ -65,10 +84,11 @@ Point to your Prometheus datasource.
 kubectl create secret generic keywatcher-db --from-literal=database-url="postgres://..."
 kubectl create secret generic keywatcher-jwt --from-literal=jwt-secret="your-secret"
 
-# Deploy
+# Deploy with specific version (not latest!)
+VERSION=v0.1.0
 helm upgrade --install keywatcher deploy/helm/ \
   --set image.repository=your-registry/keywatcher \
-  --set image.tag=latest
+  --set image.tag=$VERSION
 ```
 
 ## Final check

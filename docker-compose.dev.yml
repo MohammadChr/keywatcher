@@ -6,7 +6,9 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile
-    image: keywatcher:latest
+      args:
+        VERSION: v0.1.0
+    image: keywatcher:v0.1.0
     ports:
       - "8080:8080"
     environment:

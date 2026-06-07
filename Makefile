@@ -1,7 +1,11 @@
 BINARY=keywatcher
 CMD=./main.go
+VERSION=$(shell cat VERSION)
 
-.PHONY: dev build test lint migrate-up migrate-down docker-build helm-deploy compose-up compose-up-d compose-down compose-logs compose-restart
+.PHONY: dev build test lint migrate-up migrate-down docker-build version-bump helm-deploy compose-up compose-up-d compose-down compose-logs compose-restart
+
+version:
+	@echo "Current version: $(VERSION)"
 
 build:
 	CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/$(BINARY) $(CMD)
@@ -22,7 +26,19 @@ migrate-down:
 	migrate -path internal/store/migrations -database "$$KEYWATCHER_DB_URL" down 1
 
 docker-build:
-	docker build -f deploy/docker/Dockerfile -t keywatcher:latest .
+	docker build -f deploy/docker/Dockerfile --build-arg VERSION=$(VERSION) -t keywatcher:$(VERSION) .
+
+version-bump-patch:
+	@echo "Bump to next patch version (e.g., v0.1.0 → v0.1.1)"; \
+	read -p "Enter new version: " VERSION_NEW; \
+	echo "$$VERSION_NEW" > VERSION; \
+	echo "Version updated to $$VERSION_NEW"
+
+version-bump-minor:
+	@echo "Bump to next minor version (e.g., v0.1.0 → v0.2.0)"; \
+	read -p "Enter new version: " VERSION_NEW; \
+	echo "$$VERSION_NEW" > VERSION; \
+	echo "Version updated to $$VERSION_NEW"
 
 helm-deploy:
 	helm upgrade --install keywatcher deploy/helm/ -f deploy/helm/values.yaml
