@@ -1,15 +1,32 @@
-# VaultWatch
+# KeyWatcher
 
 Lightweight DevOps asset expiry manager. Tracks certificates, tokens, API keys,
 and any time-limited secrets. Sends alerts via Slack, Mattermost, or webhooks.
 Exposes Prometheus metrics. Deployable on Kubernetes.
 
-## Quick Start (local)
+## Quick Start (Docker Compose)
+
+Simplest way to run KeyWatcher locally with zero local dependencies:
 
 ```bash
-# Start dependencies
-docker compose -f docker-compose.dev.yml up -d
+git clone https://github.com/MohammadChr/keywatcher.git
+cd keywatcher
 
+# Start app + database (builds Docker image automatically)
+docker compose -f docker-compose.dev.yml up --build
+```
+
+App will be ready at `http://localhost:8080`
+
+**First login:**
+- Username: admin
+- Password: (create during setup)
+
+## Quick Start (Local Development)
+
+If you have Go 1.25 and PostgreSQL installed locally:
+
+```bash
 # Set env
 export KEYWATCHER_DB_URL="postgres://keywatcher:devpassword@localhost:5432/keywatcher?sslmode=disable"
 export KEYWATCHER_JWT_SECRET="changeme-dev-only"
