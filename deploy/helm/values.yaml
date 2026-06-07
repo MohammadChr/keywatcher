@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: your-registry/keywatcher
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "v0.1.0"
 
 service:
   type: ClusterIP
