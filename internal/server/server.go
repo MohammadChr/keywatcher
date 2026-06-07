@@ -11,10 +11,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
-	"vaultwatch/config"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/handler"
-	"vaultwatch/internal/store"
+	"keywatcher/config"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/handler"
+	"keywatcher/internal/store"
 )
 
 //go:embed static/index.html

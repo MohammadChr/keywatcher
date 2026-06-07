@@ -1,4 +1,4 @@
-module vaultwatch
+module keywatcher
 
 go 1.25.0
 

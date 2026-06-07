@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 )
 
 type UserHandler struct {

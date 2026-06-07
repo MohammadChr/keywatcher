@@ -11,17 +11,17 @@ services:
       - ./internal/server/static:/internal/server/static:ro
       - ./assets:/assets:ro
     environment:
-      VAULTWATCH_PORT: "8080"
-      VAULTWATCH_LOG_LEVEL: "info"
-      VAULTWATCH_DB_URL: "postgres://keywatcher:devpassword@postgres:5432/keywatcher?sslmode=disable"
-      VAULTWATCH_JWT_SECRET: "dev-secret-change-in-production-must-be-32-chars"
-      VAULTWATCH_AUTH_METHODS: "local"
-      VAULTWATCH_CHECK_INTERVAL: "1m"
-      VAULTWATCH_WARN_DAYS: "30,14,7,1"
-      VAULTWATCH_COOKIE_SECURE: "false"
-      VAULTWATCH_METRICS_TOKEN: "dev-metrics-token-for-testing"
+      KEYWATCHER_PORT: "8080"
+      KEYWATCHER_LOG_LEVEL: "info"
+      KEYWATCHER_DB_URL: "postgres://keywatcher:devpassword@postgres:5432/keywatcher?sslmode=disable"
+      KEYWATCHER_JWT_SECRET: "dev-secret-change-in-production-must-be-32-chars"
+      KEYWATCHER_AUTH_METHODS: "local"
+      KEYWATCHER_CHECK_INTERVAL: "1m"
+      KEYWATCHER_WARN_DAYS: "30,14,7,1"
+      KEYWATCHER_COOKIE_SECURE: "false"
+      KEYWATCHER_METRICS_TOKEN: "dev-metrics-token-for-testing"
       # Uncomment to test notifications locally:
-      # VAULTWATCH_NOTIFY_SLACK_WEBHOOK: "https://hooks.slack.com/..."
+      # KEYWATCHER_NOTIFY_SLACK_WEBHOOK: "https://hooks.slack.com/..."
     dns:
       - 8.8.8.8
       - 8.8.4.4

@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"fmt"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"

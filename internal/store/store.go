@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"time"
-	"vaultwatch/internal/model"
+	"keywatcher/internal/model"
 	"github.com/google/uuid"
 )
 

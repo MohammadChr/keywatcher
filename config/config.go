@@ -46,7 +46,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	viper.SetEnvPrefix("VAULTWATCH")
+	viper.SetEnvPrefix("KEYWATCHER")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 

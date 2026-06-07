@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
-	"vaultwatch/internal/model"
+	"keywatcher/internal/model"
 )
 
 type PostgresStore struct {

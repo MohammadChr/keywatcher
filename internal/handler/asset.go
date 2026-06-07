@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )

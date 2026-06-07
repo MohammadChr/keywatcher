@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"vaultwatch/config"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/config"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 )
 
 type SetupHandler struct {

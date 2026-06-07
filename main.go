@@ -11,13 +11,13 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"vaultwatch/config"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/expiry"
-	"vaultwatch/internal/handler"
-	"vaultwatch/internal/notify"
-	"vaultwatch/internal/server"
-	"vaultwatch/internal/store"
+	"keywatcher/config"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/expiry"
+	"keywatcher/internal/handler"
+	"keywatcher/internal/notify"
+	"keywatcher/internal/server"
+	"keywatcher/internal/store"
 )
 
 func main() {

@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"time"
-	"vaultwatch/internal/model"
+	"keywatcher/internal/model"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

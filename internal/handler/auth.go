@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-	"vaultwatch/internal/auth"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
-	"vaultwatch/config"
+	"keywatcher/internal/auth"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
+	"keywatcher/config"
 	"github.com/google/uuid"
 )
 

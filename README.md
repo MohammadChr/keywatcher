@@ -11,9 +11,9 @@ Exposes Prometheus metrics. Deployable on Kubernetes.
 docker compose -f docker-compose.dev.yml up -d
 
 # Set env
-export VAULTWATCH_DB_URL="postgres://keywatcher:devpassword@localhost:5432/keywatcher?sslmode=disable"
-export VAULTWATCH_JWT_SECRET="changeme-dev-only"
-export VAULTWATCH_AUTH_METHODS="local"
+export KEYWATCHER_DB_URL="postgres://keywatcher:devpassword@localhost:5432/keywatcher?sslmode=disable"
+export KEYWATCHER_JWT_SECRET="changeme-dev-only"
+export KEYWATCHER_AUTH_METHODS="local"
 
 # Run migrations
 make migrate-up

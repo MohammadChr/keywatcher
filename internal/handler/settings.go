@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"vaultwatch/internal/notify"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/notify"
+	"keywatcher/internal/store"
 
 	"github.com/rs/zerolog/log"
 )

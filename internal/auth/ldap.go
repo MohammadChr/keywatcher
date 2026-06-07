@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 	"github.com/google/uuid"
 	ldap "github.com/go-ldap/ldap/v3"
 )

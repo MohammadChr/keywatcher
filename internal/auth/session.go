@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	"vaultwatch/internal/model"
-	"vaultwatch/internal/store"
+	"keywatcher/internal/model"
+	"keywatcher/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )

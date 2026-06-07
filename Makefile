@@ -16,10 +16,10 @@ lint:
 	golangci-lint run ./...
 
 migrate-up:
-	migrate -path internal/store/migrations -database "$$VAULTWATCH_DB_URL" up
+	migrate -path internal/store/migrations -database "$$KEYWATCHER_DB_URL" up
 
 migrate-down:
-	migrate -path internal/store/migrations -database "$$VAULTWATCH_DB_URL" down 1
+	migrate -path internal/store/migrations -database "$$KEYWATCHER_DB_URL" down 1
 
 docker-build:
 	docker build -f deploy/docker/Dockerfile -t keywatcher:latest .
