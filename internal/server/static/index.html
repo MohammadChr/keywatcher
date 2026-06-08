@@ -594,7 +594,13 @@
                     return
                 }
                 token = data.data.token
+                if (!token) {
+                    errEl.textContent = 'Login failed: no token received'
+                    log.error('Login response missing token:', data)
+                    return
+                }
                 localStorage.setItem('vw_token', token)
+                log.info('Login successful, token stored')
                 showApp()
                 loadDashboard()
             } catch (e) {
@@ -664,11 +670,15 @@
         // ═══════════════════════════════════════════════════════════════
 
         async function apiFetch(path) {
+            if (!token) {
+                log.error('apiFetch called with no token! Path:', path)
+                return null
+            }
             const resp = await fetch(path, {
                 headers: { 'Authorization': 'Bearer ' + token }
             })
             if (!resp.ok) {
-                log.error('apiFetch failed:', path, resp.status)
+                log.error('apiFetch failed:', path, resp.status, '(token length:', token.length, ')')
                 return null
             }
             const json = await resp.json()
