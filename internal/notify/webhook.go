@@ -2,6 +2,7 @@ package notify
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"time"
 )
@@ -12,7 +13,15 @@ type WebhookNotifier struct {
 }
 
 func NewWebhook(url string) *WebhookNotifier {
-	return &WebhookNotifier{url: url, client: &http.Client{Timeout: 8 * time.Second}}
+	// Use custom transport that skips TLS verification for self-signed certs (dev/test only)
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: transport,
+	}
+	return &WebhookNotifier{url: url, client: client}
 }
 
 func (w *WebhookNotifier) Name() string { return "webhook" }

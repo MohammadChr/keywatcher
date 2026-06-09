@@ -191,7 +191,9 @@ func New(cfg *config.Config, s store.Store, authHandler *handler.AuthHandler, as
 		if srv.cfg.MetricsToken != "" {
 			auth := r.Header.Get("Authorization")
 			if auth != "Bearer "+srv.cfg.MetricsToken {
+				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error":"metrics token required"}`))
 				return
 			}
 		}

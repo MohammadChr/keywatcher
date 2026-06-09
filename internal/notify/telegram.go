@@ -3,6 +3,7 @@ package notify
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,10 +17,18 @@ type TelegramNotifier struct {
 }
 
 func NewTelegram(token, chatID string) *TelegramNotifier {
+	// Use custom transport that skips TLS verification for self-signed certs (dev/test only)
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: transport,
+	}
 	return &TelegramNotifier{
 		token:  token,
 		chatID: chatID,
-		client: &http.Client{Timeout: 8 * time.Second},
+		client: client,
 	}
 }
 

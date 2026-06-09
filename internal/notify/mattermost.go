@@ -2,6 +2,7 @@ package notify
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,7 +14,15 @@ type MattermostNotifier struct {
 }
 
 func NewMattermost(webhookURL string) *MattermostNotifier {
-	return &MattermostNotifier{webhookURL: webhookURL, client: &http.Client{Timeout: 8 * time.Second}}
+	// Use custom transport that skips TLS verification for self-signed certs (dev/test only)
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: transport,
+	}
+	return &MattermostNotifier{webhookURL: webhookURL, client: client}
 }
 
 func (m *MattermostNotifier) Name() string { return "mattermost" }
