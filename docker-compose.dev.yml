@@ -20,7 +20,7 @@ services:
       KEYWATCHER_CHECK_INTERVAL: "1m"
       KEYWATCHER_WARN_DAYS: "30,14,7,1"
       KEYWATCHER_COOKIE_SECURE: "false"
-      KEYWATCHER_METRICS_TOKEN: "dev-metrics-token-for-testing"
+      # KEYWATCHER_METRICS_TOKEN: "" (empty = public access in dev)
       # Uncomment to test notifications locally:
       # KEYWATCHER_NOTIFY_SLACK_WEBHOOK: "https://hooks.slack.com/..."
     dns:
