@@ -250,12 +250,27 @@ func New(cfg *config.Config, s store.Store, authHandler *handler.AuthHandler, as
 	admin.Post("/api/v1/assets/{id}/silence", silenceHandler.Silence)
 	admin.Delete("/api/v1/assets/{id}/silence", silenceHandler.Unsilence)
 
-	// Frontend SPA - serve index.html for root and SPA routes only
+	// Frontend SPA - serve index.html for root and all SPA routes
 	srv.router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		data, _ := staticFiles.ReadFile("static/index.html")
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write(data)
 	})
+
+	// SPA fallback: serve index.html for all frontend routes not matched above
+	// This allows client-side routing to work (e.g., /assets, /users, /settings)
+	srv.router.NotFound(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Only serve HTML for GET requests to paths that look like SPA routes
+		// (don't serve for /api/*, already handled by API routes)
+		if r.Method == http.MethodGet && !strings.HasPrefix(r.URL.Path, "/api/") {
+			data, _ := staticFiles.ReadFile("static/index.html")
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write(data)
+			return
+		}
+		// Return 404 for actual missing routes
+		http.NotFound(w, r)
+	}))
 
 	return srv
 }
