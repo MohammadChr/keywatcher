@@ -54,7 +54,7 @@
     }
   ],
   "uid": "keywatcher-main",
-  "title": "VaultWatch",
+  "title": "KeyWatcher",
   "description": "Asset expiry monitoring dashboard",
   "tags": ["keywatcher", "observability"],
   "timezone": "browser",

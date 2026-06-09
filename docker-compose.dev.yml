@@ -5,7 +5,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: deploy/docker/Dockerfile
+      dockerfile: deploy/docker/Dockerfile.dev
       args:
         VERSION: v0.1.0
     image: keywatcher:v0.1.0

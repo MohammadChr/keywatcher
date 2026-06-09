@@ -671,12 +671,21 @@
 
         async function apiFetch(path) {
             if (!token) {
-                log.error('apiFetch called with no token! Path:', path)
+                log.error('apiFetch called with no token! Redirecting to login. Path:', path)
+                logout()
                 return null
             }
             const resp = await fetch(path, {
                 headers: { 'Authorization': 'Bearer ' + token }
             })
+
+            // Handle 401: token expired or invalid — redirect to login
+            if (resp.status === 401) {
+                log.error('apiFetch got 401 (unauthorized). Token expired or invalid. Redirecting to login.')
+                logout()
+                return null
+            }
+
             if (!resp.ok) {
                 log.error('apiFetch failed:', path, resp.status, '(token length:', token.length, ')')
                 return null

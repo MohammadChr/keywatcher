@@ -1,0 +1,15 @@
+# Dev Dockerfile: Uses pre-built binary instead of building in container
+# Much faster for local development
+FROM scratch
+
+ARG VERSION=dev
+
+# Copy the pre-built binary
+COPY bin/keywatcher /keywatcher
+
+# Copy static files
+COPY internal/server/static /internal/server/static
+
+WORKDIR /
+EXPOSE 8080
+ENTRYPOINT ["/keywatcher"]
