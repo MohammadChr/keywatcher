@@ -55,6 +55,11 @@ func main() {
 	}
 	defer s.Close()
 
+	// Auto-apply migrations on startup
+	if err := s.RunMigrations(context.Background(), cfg.DatabaseURL); err != nil {
+		log.Fatal().Err(err).Msg("failed to run migrations")
+	}
+
 	// Auth providers
 	var oidcAuth *auth.OIDCAuthenticator
 	var ldapAuth *auth.LDAPAuthenticator

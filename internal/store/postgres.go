@@ -2,16 +2,23 @@ package store
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 	"keywatcher/internal/model"
 )
+
+//go:embed migrations/*.sql
+var migrationFiles embed.FS
 
 type PostgresStore struct {
 	pool *pgxpool.Pool
@@ -44,6 +51,27 @@ func NewPostgres(ctx context.Context, dsn string) (*PostgresStore, error) {
 
 func (s *PostgresStore) Ping(ctx context.Context) error {
 	return s.pool.Ping(ctx)
+}
+
+func (s *PostgresStore) RunMigrations(ctx context.Context, dsn string) error {
+	// Auto-apply migrations on startup using embedded migration files
+	src, err := iofs.New(migrationFiles, "migrations")
+	if err != nil {
+		return fmt.Errorf("store.RunMigrations source: %w", err)
+	}
+
+	// Use postgres driver via DSN
+	m, err := migrate.NewWithSourceInstance("iofs", src, dsn)
+	if err != nil {
+		return fmt.Errorf("store.RunMigrations new: %w", err)
+	}
+
+	// Apply migrations (ErrNoChange means all are up-to-date, which is OK)
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("store.RunMigrations up: %w", err)
+	}
+
+	return nil
 }
 
 func (s *PostgresStore) Close() {

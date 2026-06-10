@@ -1684,7 +1684,8 @@
             try {
                 const res = await fetch('/setup/status')
                 const data = await res.json()
-                if (!data.data.setup_completed) {
+                // Guard against null data and non-ok response
+                if (!res.ok || !data.data || !data.data.setup_completed) {
                     showSetup()
                 } else if (token) {
                     showApp()
@@ -1694,8 +1695,8 @@
                 }
             } catch (e) {
                 log.error('Failed to check setup:', e)
-                // Fallback: show login screen
-                showLogin()
+                // Fresh install or error: show setup screen
+                showSetup()
             }
         }
 

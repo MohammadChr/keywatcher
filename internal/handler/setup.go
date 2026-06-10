@@ -26,7 +26,9 @@ func NewSetupHandler(s store.Store, cfg *config.Config) *SetupHandler {
 func (h *SetupHandler) Status(w http.ResponseWriter, r *http.Request) {
 	done, err := h.store.IsSetupCompleted(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "cannot check setup status")
+		// Missing table = fresh install = setup not completed
+		// Return 200 OK with setup_completed: false to trigger setup flow
+		writeJSON(w, http.StatusOK, map[string]bool{"setup_completed": false})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]bool{"setup_completed": done})
